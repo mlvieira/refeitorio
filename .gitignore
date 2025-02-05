@@ -1,0 +1,40 @@
+# database
+refeitorio-api/db
+
+# dependencies
+node_modules/
+
+# Expo
+refeitorio-expo/.expo/
+refeitorio-expo/dist/
+refeitorio-expo/web-build/
+refeitorio-expo/expo-env.d.ts
+
+# Native
+refeitorio-expo/*.orig.*
+refeitorio-expo/*.jks
+refeitorio-expo/*.p8
+refeitorio-expo/*.p12
+refeitorio-expo/*.key
+refeitorio-expo/*.mobileprovision
+
+# Metro
+refeitorio-expo/.metro-health-check*
+
+# debug
+refeitorio-expo/npm-debug.*
+refeitorio-expo/yarn-debug.*
+refeitorio-expo/yarn-error.*
+
+# macOS
+refeitorio-expo/.DS_Store
+refeitorio-expo/*.pem
+
+# local env files
+.env
+
+# typescript
+refeitorio-expo/*.tsbuildinfo
+
+# npm lock file
+package-lock.json
