@@ -58,7 +58,7 @@ exports.createFuncionario = (req, res) => {
 exports.getFuncionarios = (req, res) => {
     const query = `
         SELECT 
-            f.id, f.nome, f.username, a.alergias
+            f.id, f.nome, f.username, f.role, a.alergias
         FROM 
             funcionarios f
         LEFT JOIN 
