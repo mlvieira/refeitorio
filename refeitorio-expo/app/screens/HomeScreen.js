@@ -21,6 +21,8 @@ export default function HomeScreen({ navigation }) {
   const scheduleNotification = useCallback(async () => {
     if (user) return;
 
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
     const now = DateTime.now().setZone('America/Sao_Paulo');
     const scheduledTime = now.set({
       hour: DEADLINE_HOURS,
