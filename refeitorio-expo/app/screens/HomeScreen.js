@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { DateTime } from 'luxon';
 import Constants from 'expo-constants';
@@ -48,6 +48,23 @@ export default function HomeScreen({ navigation }) {
     }
   }, [user]);
 
+  const handleSecureNavigation = (
+    navigation,
+    screen,
+    user,
+    requiredRole,
+    params = {},
+  ) => {
+    if (user?.role < requiredRole) {
+      Alert.alert(
+        'Acesso Negado',
+        'Você não tem permissão para acessar esta seção.',
+      );
+      return;
+    }
+    navigation.navigate(screen, params);
+  };
+
   useEffect(() => {
     requestNotificationPermissions();
     scheduleNotification();
@@ -61,26 +78,26 @@ export default function HomeScreen({ navigation }) {
       <Text className="text-3xl font-bold mb-6">️Bem-vindo ao Refeitório!</Text>
 
       <View className="w-full space-y-4">
-        {user?.role <= 3 && (
-          <TouchableOpacity
-            className="bg-blue-500 py-3 px-6 mb-5 rounded-xl shadow-md items-center"
-            onPress={() =>
-              navigation.navigate('editarCadastro', {
-                user,
-                canEditRole: false,
-              })
-            }
-          >
-            <Text className="text-white text-lg font-semibold">
-              Editar Minhas Informações
-            </Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          className="bg-blue-500 py-3 px-6 mb-5 rounded-xl shadow-md items-center"
+          onPress={() =>
+            handleSecureNavigation(navigation, 'editarCadastro', user, 1, {
+              user,
+              canEditRole: user.role === 3,
+            })
+          }
+        >
+          <Text className="text-white text-lg font-semibold">
+            Editar Minhas Informações
+          </Text>
+        </TouchableOpacity>
 
         {user?.role >= 3 && (
           <TouchableOpacity
             className="bg-orange-500 py-3 px-6 mb-5 rounded-xl shadow-md items-center"
-            onPress={() => navigation.navigate('cadastro')}
+            onPress={() =>
+              handleSecureNavigation(navigation, 'cadastro', user, 3)
+            }
           >
             <Text className="text-white text-lg font-semibold">
               Cadastro de Funcionários
@@ -90,7 +107,9 @@ export default function HomeScreen({ navigation }) {
 
         <TouchableOpacity
           className="bg-green-500 py-3 px-6 mb-5 rounded-xl shadow-md items-center"
-          onPress={() => navigation.navigate('confirmar')}
+          onPress={() =>
+            handleSecureNavigation(navigation, 'confirmar', user, 1)
+          }
         >
           <Text className="text-white text-lg font-semibold">
             Confirmar Refeição
@@ -100,7 +119,9 @@ export default function HomeScreen({ navigation }) {
         {user?.role >= 2 && (
           <TouchableOpacity
             className="bg-yellow-500 py-3 px-6 mb-5 rounded-xl shadow-md items-center"
-            onPress={() => navigation.navigate('cozinha')}
+            onPress={() =>
+              handleSecureNavigation(navigation, 'cozinha', user, 2)
+            }
           >
             <Text className="text-white text-lg font-semibold">
               Controle da Cozinha
