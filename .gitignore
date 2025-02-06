@@ -9,6 +9,7 @@ refeitorio-expo/.expo/
 refeitorio-expo/dist/
 refeitorio-expo/web-build/
 refeitorio-expo/expo-env.d.ts
+refeitorio-expo/nativewind-env.d.ts
 
 # Native
 refeitorio-expo/*.orig.*
