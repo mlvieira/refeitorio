@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useReducer } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+
+const formReducer = (state, action) => ({
+  ...state,
+  [action.name]: action.value,
+});
 
 export default function UserForm({
   initialData = {},
@@ -8,21 +13,21 @@ export default function UserForm({
   isEditing = false,
   showRole = true,
 }) {
-  const [nome, setNome] = useState(initialData.nome || '');
-  const [username, setUsername] = useState(initialData.username || '');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [alergias, setAlergias] = useState(initialData.alergias || '');
-  const [role, setRole] = useState(initialData.role || 1);
+
+  const [formData, dispatch] = useReducer(formReducer, {
+    nome: initialData.nome || '',
+    username: initialData.username || '',
+    password: '',
+    alergias: initialData.alergias || '',
+    role: initialData.role || 1,
+  });
 
   const handleSubmit = async () => {
-    if (!nome || (!isEditing && !password)) {
+    if (!formData.nome || (!isEditing && !formData.password)) {
       Alert.alert('Erro', 'Nome, Usuário e Senha são obrigatórios.');
       return;
     }
-
-    const formData = { nome, username, alergias, role };
-    if (password) formData.password = password;
 
     onSubmit(formData);
   };
@@ -33,8 +38,8 @@ export default function UserForm({
         <Text className="text-lg font-semibold text-gray-700">Nome:</Text>
         <TextInput
           className="border border-gray-300 p-3 rounded-md mt-1 bg-white"
-          value={nome}
-          onChangeText={setNome}
+          value={formData.nome}
+          onChangeText={(value) => dispatch({ name: 'nome', value })}
           placeholder="Digite o nome"
         />
       </View>
@@ -43,8 +48,8 @@ export default function UserForm({
         <Text className="text-lg font-semibold text-gray-700">Usuário:</Text>
         <TextInput
           className={`border border-gray-300 p-3 rounded-md mt-1 ${showRole ? 'bg-white' : 'bg-gray-200'}`}
-          value={username}
-          onChangeText={setUsername}
+          value={formData.username}
+          onChangeText={(value) => dispatch({ name: 'username', value })}
           editable={showRole}
           placeholder="Digite o usuário"
         />
@@ -55,8 +60,8 @@ export default function UserForm({
         <View className="relative">
           <TextInput
             className="border border-gray-300 p-3 rounded-md mt-1 bg-white pr-16"
-            value={password}
-            onChangeText={setPassword}
+            value={formData.password}
+            onChangeText={(value) => dispatch({ name: 'password', value })}
             placeholder={
               isEditing
                 ? 'Deixe em branco para manter a atual'
@@ -79,8 +84,8 @@ export default function UserForm({
         <Text className="text-lg font-semibold text-gray-700">Alergias:</Text>
         <TextInput
           className="border border-gray-300 p-3 rounded-md mt-1 bg-white"
-          value={alergias}
-          onChangeText={setAlergias}
+          value={formData.alergias}
+          onChangeText={(value) => dispatch({ name: 'alergias', value })}
           placeholder="Ex: Glúten, Lactose"
         />
       </View>
@@ -90,8 +95,8 @@ export default function UserForm({
           <Text className="text-lg font-semibold text-gray-700">Função:</Text>
           <View className="border border-gray-300 rounded-md mt-1 bg-white">
             <Picker
-              selectedValue={role}
-              onValueChange={(itemValue) => setRole(itemValue)}
+              selectedValue={formData.role}
+              onValueChange={(value) => dispatch({ name: 'role', value })}
             >
               <Picker.Item label="Funcionário" value={1} />
               <Picker.Item label="Cozinheiro" value={2} />
