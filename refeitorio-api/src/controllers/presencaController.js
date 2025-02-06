@@ -82,3 +82,28 @@ exports.listarAlmoco = (req, res) => {
         res.status(200).json(rows);
     });
 }
+
+exports.listarPresencaPorId = (req, res) => {
+    const { id } = req.params;
+
+    const query = `
+        SELECT 
+            f.id
+        FROM 
+            funcionarios f
+        JOIN 
+            presencas p ON p.funcionario_id = f.id
+        WHERE 
+            f.id = ?
+            AND p.presenca = 1
+            AND p.data = DATE('now')
+    `;
+
+    db.get(query, [id], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.status(200).json(row || {});
+    });
+}
