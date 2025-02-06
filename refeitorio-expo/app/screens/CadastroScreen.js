@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import XXH from 'xxhashjs';
 import { getFuncionarios, addFuncionario } from '../services/ApiServices';
 import { saveData, getData } from '../storage/AsyncStorageService';
 import UserForm from '../components/UserForm';
+
+const roleNames = {
+  1: 'Funcionário',
+  2: 'Cozinheiro',
+  3: 'RH',
+};
 
 export default function CadastroScreen() {
   const [funcionarios, setFuncionarios] = useState([]);
@@ -47,16 +53,10 @@ export default function CadastroScreen() {
     }
   };
 
-  const getRoleName = (role) => {
-    switch (role) {
-      case 1:
-        return 'Funcionário';
-      case 2:
-        return 'Cozinheiro';
-      default:
-        return 'RH';
-    }
-  };
+  const getRoleName = useMemo(
+    () => (role) => roleNames[role] || 'Desconhecido',
+    [],
+  );
 
   useEffect(() => {
     fetchFuncionarios();
