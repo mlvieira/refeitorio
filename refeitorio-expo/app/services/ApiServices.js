@@ -16,9 +16,11 @@ export const login = async (username, password) => {
   return response.data;
 };
 
-export const getFuncionarios = async () => {
+export const getFuncionarios = async (page, limit) => {
   try {
-    const response = await axios.get(`${API_URL}/funcionarios`);
+    const response = await axios.get(
+      `${API_URL}/funcionarios/${page}/${limit}`,
+    );
     return response.data;
   } catch (error) {
     console.error('Erro ao listar funcionários: ', error);

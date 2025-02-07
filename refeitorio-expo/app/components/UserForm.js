@@ -33,7 +33,7 @@ export default function UserForm({
   };
 
   return (
-    <View className="space-y-4">
+    <View className="space-y-4 p-4">
       <View>
         <Text className="text-lg font-semibold text-gray-700">Nome:</Text>
         <TextInput
