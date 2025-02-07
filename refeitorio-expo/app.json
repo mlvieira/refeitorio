@@ -16,7 +16,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/favicon.png"
-      }
+      },
+      "package": "com.mlvieira.refeitorioraisman"
     },
     "web": {
       "bundler": "metro",
