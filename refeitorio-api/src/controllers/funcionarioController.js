@@ -56,6 +56,10 @@ exports.createFuncionario = (req, res) => {
 };
 
 exports.getFuncionarios = (req, res) => {
+    const page = Number(req.params.page) || 1;
+    const limit = Number(req.params.limit) || 10;
+    const offset = (page - 1) * limit;
+
     const query = `
         SELECT 
             f.id, f.nome, f.username, f.role, a.alergias
@@ -65,9 +69,10 @@ exports.getFuncionarios = (req, res) => {
             alergias_funcionarios a ON f.id = a.funcionario_id
         ORDER BY 
             f.nome ASC
+        LIMIT ? OFFSET ?
     `;
 
-    db.all(query, [], (err, rows) => {
+    db.all(query, [limit, offset], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.status(200).json(rows);
     });
