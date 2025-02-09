@@ -7,16 +7,19 @@ import { useAuth } from '../context/AuthContext';
 
 export default function EditarCadastro({ route, navigation }) {
   const { user, canEditRole } = route.params;
-  const { setUser } = useAuth();
+  const { setUser, user: currentUser } = useAuth();
 
   const editarFuncionario = async (formData) => {
     try {
       const response = await updateFuncionario(user.id, formData);
       Alert.alert('Sucesso', response.message);
 
-      const updatedUser = { ...user, ...formData };
-      await saveData('user', updatedUser);
-      setUser(updatedUser);
+      if (currentUser.id === user.id) {
+        delete formData.password;
+        const updatedUser = { ...user, ...formData };
+        await saveData('user', updatedUser);
+        setUser(updatedUser);
+      }
 
       setTimeout(() => {
         navigation.goBack();
