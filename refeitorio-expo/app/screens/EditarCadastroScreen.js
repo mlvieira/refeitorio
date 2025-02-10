@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Alert } from 'react-native';
-import { updateFuncionario } from '../services/ApiServices';
-import { saveData } from '../storage/AsyncStorageService';
+import FuncionarioController from '../controllers/FuncionarioController';
 import UserForm from '../components/UserForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,24 +10,19 @@ export default function EditarCadastro({ route, navigation }) {
 
   const editarFuncionario = async (formData) => {
     try {
-      const response = await updateFuncionario(user.id, formData);
-      Alert.alert('Sucesso', response.message);
-
-      if (currentUser.id === user.id) {
-        delete formData.password;
-        const updatedUser = { ...user, ...formData };
-        await saveData('user', updatedUser);
-        setUser(updatedUser);
-      }
+      await FuncionarioController.editarFuncionario(
+        user.id,
+        formData,
+        currentUser,
+        setUser,
+      );
+      Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
 
       setTimeout(() => {
         navigation.goBack();
       }, 1500);
     } catch (error) {
-      Alert.alert(
-        'Erro',
-        error.response?.data?.error || 'Erro ao atualizar o perfil.',
-      );
+      Alert.alert('Erro', error.message);
     }
   };
 

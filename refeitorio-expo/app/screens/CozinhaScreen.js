@@ -1,25 +1,16 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator } from 'react-native';
-import { listarAlmoco } from '../services/ApiServices';
+import PresencaController from '../controllers/PresencaController';
 
 export default function CozinhaScreen() {
   const [presencas, setPresencas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useMemo(() => {
-    const fetchData = async () => {
-      try {
-        const data = await listarAlmoco();
-        setPresencas(data);
-      } catch (_err) {
-        setError('Erro ao carregar a lista de presenças.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+  useEffect(() => {
+    PresencaController.listarPresencas(setPresencas)
+      .catch(() => setError('Erro ao carregar a lista de presenças.'))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {

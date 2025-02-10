@@ -7,22 +7,20 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import AuthController from '../controllers/AuthController';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const { setUser } = useAuth();
 
   const handleLogin = async () => {
     try {
-      await login(username, password);
+      await AuthController.login(username, password, setUser);
     } catch (error) {
-      Alert.alert(
-        'Erro no Login',
-        error.response?.data?.error || 'Credenciais inválidas.',
-      );
+      Alert.alert('Erro no Login', error.message);
     }
   };
 
@@ -38,6 +36,7 @@ export default function LoginScreen() {
           Refeitório
         </Text>
       </View>
+
       <View className="w-4/5 p-4 bg-gray-100 rounded-lg shadow-md">
         <Text className="text-lg font-semibold mb-2">Usuário:</Text>
         <TextInput

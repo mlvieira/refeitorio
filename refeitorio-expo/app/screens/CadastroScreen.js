@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,18 +6,12 @@ import {
   FlatList,
   Alert,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import XXH from 'xxhashjs';
-import { getFuncionarios, addFuncionario } from '../services/ApiServices';
-import { saveData, getData } from '../storage/AsyncStorageService';
+import FuncionarioController from '../controllers/FuncionarioController';
 import UserForm from '../components/UserForm';
-
-const roleNames = {
-  1: 'Funcionário',
-  2: 'Cozinheiro',
-  3: 'RH',
-};
+import Constants from '../utils/Constants';
 
 export default function CadastroScreen() {
   const [funcionarios, setFuncionarios] = useState([]);
@@ -43,65 +31,37 @@ export default function CadastroScreen() {
       })
     : 0;
 
-  const hashData = (data) => XXH.h32(JSON.stringify(data), 0xabcd).toString(16);
-
-  const fetchFuncionarios = useCallback(
-    async (reset = false) => {
-      if (loading || !hasMore) return;
-
-      setLoading(true);
-      try {
-        const data = await getFuncionarios(page, 10);
-        if (data.length === 0) {
-          setHasMore(false);
-          return;
-        }
-
-        const currentHash = hashData(funcionarios);
-        const newHash = hashData(data);
-
-        if (reset) {
-          setFuncionarios(data);
-        } else if (currentHash !== newHash) {
-          setFuncionarios((prev) => [...prev, ...data]);
-        }
-        await saveData('funcionarios', data);
-        setPage((prevPage) => prevPage + 1);
-      } catch (_error) {
-        const cachedData = await getData('funcionarios');
-        if (cachedData) setFuncionarios(cachedData);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [page, loading, hasMore, funcionarios],
-  );
-
-  const adicionarFuncionario = async (formData) => {
-    try {
-      const response = await addFuncionario(formData);
-      Alert.alert('Sucesso', response.message);
-
-      delete formData.password;
-
-      setFuncionarios((prev) => [formData, ...prev]);
-      await saveData('funcionarios', [formData, ...funcionarios]);
-    } catch (error) {
-      Alert.alert(
-        'Erro',
-        error.response?.data?.error || 'Não foi possível criar o usuário.',
-      );
-    }
-  };
-
-  const getRoleName = useMemo(
-    () => (role) => roleNames[role] || 'Desconhecido',
-    [],
-  );
+  const fetchFuncionarios = useCallback(() => {
+    FuncionarioController.fetchFuncionarios(
+      page,
+      setFuncionarios,
+      setPage,
+      setHasMore,
+      setLoading,
+    );
+  }, [page]);
 
   useEffect(() => {
     fetchFuncionarios();
-  }, [fetchFuncionarios]);
+  }, []);
+
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  const adicionarFuncionario = async (formData) => {
+    try {
+      const message = await FuncionarioController.adicionarFuncionario(
+        formData,
+        setFuncionarios,
+      );
+      Alert.alert('Sucesso', message);
+    } catch (error) {
+      Alert.alert('Erro', error.message);
+    }
+  };
 
   const onFormLayout = (event) => {
     const { height } = event.nativeEvent.layout;
@@ -137,9 +97,7 @@ export default function CadastroScreen() {
       <Animated.View
         onLayout={onFormLayout}
         className="absolute top-0 left-0 right-0 z-10"
-        style={{
-          transform: [{ translateY: formTranslateY }],
-        }}
+        style={{ transform: [{ translateY: formTranslateY }] }}
         pointerEvents={formHidden ? 'none' : 'auto'}
       >
         <UserForm onSubmit={adicionarFuncionario} showRole={true} />
@@ -155,7 +113,7 @@ export default function CadastroScreen() {
 
         <FlatList
           data={funcionarios}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
               className="p-4 bg-white rounded-lg shadow-sm mb-2 border border-gray-200 flex-row justify-between items-center"
@@ -180,14 +138,20 @@ export default function CadastroScreen() {
                 </Text>
                 <Text className="text-gray-700 mt-1">
                   Função:{' '}
-                  <Text className="font-medium">{getRoleName(item.role)}</Text>
+                  <Text className="font-medium">
+                    {Constants.roleNames[item.role] || 'Desconhecido'}
+                  </Text>
                 </Text>
               </View>
               <Text className="text-2xl text-blue-400">➔</Text>
             </TouchableOpacity>
           )}
           onScroll={handleScroll}
-          scrollEventThrottle={16}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loading ? <ActivityIndicator size="large" color="#4F46E5" /> : null
+          }
           ListEmptyComponent={
             <Text className="text-center text-gray-500 mt-4">
               Nenhum funcionário cadastrado.

@@ -1,76 +1,15 @@
-import React, { useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import * as Notifications from 'expo-notifications';
-import { DateTime } from 'luxon';
-import Constants from 'expo-constants';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import HomeController from '../controllers/HomeController';
 import { useAuth } from '../context/AuthContext';
-
-const DEADLINE_HOURS = Constants.expoConfig.extra.DEADLINE_HOURS;
-const DEADLINE_MINUTES = Constants.expoConfig.extra.DEADLINE_MINUTES;
 
 export default function HomeScreen({ navigation }) {
   const { user, logout } = useAuth();
 
-  const requestNotificationPermissions = async () => {
-    const { status } = await Notifications.getPermissionsAsync();
-    if (status !== 'granted') {
-      await Notifications.requestPermissionsAsync();
-    }
-  };
-
-  const scheduleNotification = useCallback(async () => {
-    if (user) return;
-
-    await Notifications.cancelAllScheduledNotificationsAsync();
-
-    const now = DateTime.now().setZone('America/Sao_Paulo');
-    const scheduledTime = now.set({
-      hour: DEADLINE_HOURS,
-      minute: DEADLINE_MINUTES - 30,
-      second: 0,
-      millisecond: 0,
-    });
-
-    if (now < scheduledTime) {
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowAlert: true,
-          shouldPlaySound: false,
-          shouldSetBadge: false,
-        }),
-      });
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Lembrete de Confirmação',
-          body: `Não se esqueça de confirmar seu almoço antes das ${DEADLINE_HOURS}:${DEADLINE_MINUTES}!`,
-          sound: 'default',
-        },
-        trigger: { seconds: scheduledTime.toSeconds() - now.toSeconds() },
-      });
-    }
-  }, [user]);
-
-  const handleSecureNavigation = (
-    navigation,
-    screen,
-    user,
-    requiredRole,
-    params = {},
-  ) => {
-    if (user?.role < requiredRole) {
-      Alert.alert(
-        'Acesso Negado',
-        'Você não tem permissão para acessar esta seção.',
-      );
-      return;
-    }
-    navigation.navigate(screen, params);
-  };
-
   useEffect(() => {
-    requestNotificationPermissions();
-    scheduleNotification();
-  }, [scheduleNotification]);
+    HomeController.requestNotificationPermissions();
+    HomeController.scheduleNotification(user);
+  }, [user]);
 
   return (
     <View className="flex-1 justify-center items-center bg-gray-50 p-4">
@@ -83,10 +22,16 @@ export default function HomeScreen({ navigation }) {
         <TouchableOpacity
           className="bg-blue-500 py-3 px-6 mb-5 rounded-xl shadow-md items-center"
           onPress={() =>
-            handleSecureNavigation(navigation, 'editarCadastro', user, 1, {
+            HomeController.handleSecureNavigation(
+              navigation,
+              'editarCadastro',
               user,
-              canEditRole: user.role === 3,
-            })
+              1,
+              {
+                user,
+                canEditRole: user.role === 3,
+              },
+            )
           }
         >
           <Text className="text-white text-lg font-semibold">
@@ -98,7 +43,12 @@ export default function HomeScreen({ navigation }) {
           <TouchableOpacity
             className="bg-orange-500 py-3 px-6 mb-5 rounded-xl shadow-md items-center"
             onPress={() =>
-              handleSecureNavigation(navigation, 'cadastro', user, 3)
+              HomeController.handleSecureNavigation(
+                navigation,
+                'cadastro',
+                user,
+                3,
+              )
             }
           >
             <Text className="text-white text-lg font-semibold">
@@ -110,7 +60,12 @@ export default function HomeScreen({ navigation }) {
         <TouchableOpacity
           className="bg-green-500 py-3 px-6 mb-5 rounded-xl shadow-md items-center"
           onPress={() =>
-            handleSecureNavigation(navigation, 'confirmar', user, 1)
+            HomeController.handleSecureNavigation(
+              navigation,
+              'confirmar',
+              user,
+              1,
+            )
           }
         >
           <Text className="text-white text-lg font-semibold">
@@ -122,7 +77,12 @@ export default function HomeScreen({ navigation }) {
           <TouchableOpacity
             className="bg-yellow-500 py-3 px-6 mb-5 rounded-xl shadow-md items-center"
             onPress={() =>
-              handleSecureNavigation(navigation, 'cozinha', user, 2)
+              HomeController.handleSecureNavigation(
+                navigation,
+                'cozinha',
+                user,
+                2,
+              )
             }
           >
             <Text className="text-white text-lg font-semibold">

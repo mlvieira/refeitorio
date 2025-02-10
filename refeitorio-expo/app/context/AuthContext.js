@@ -7,8 +7,7 @@ import React, {
 } from 'react';
 import { Alert } from 'react-native';
 import axios from 'axios';
-import { login as loginUsuario, setAuthToken } from '../services/ApiServices';
-import { getData, saveData, removeData } from '../storage/AsyncStorageService';
+import AuthController from '../controllers/AuthController';
 
 const AuthContext = createContext();
 
@@ -16,20 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const restoreSession = async () => {
-      try {
-        const storedUser = await getData('user');
-        const storedToken = await getData('token');
-
-        if (storedUser && storedToken) {
-          setUser(storedUser);
-          setAuthToken(storedToken);
-        }
-      } catch (error) {
-        console.error('Erro ao restaurar sessão:', error);
-      }
-    };
-    restoreSession();
+    AuthController.restoreSession(setUser);
 
     const interceptor = axios.interceptors.response.use(
       (response) => response,
@@ -56,35 +42,19 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await loginUsuario(username, password);
-
-      if (response.token && response.user) {
-        await saveData('token', response.token);
-        await saveData('user', response.user);
-
-        setAuthToken(response.token);
-        setUser(response.user);
-      } else {
-        throw new Error('Credenciais inválidas.');
-      }
+      return await AuthController.login(username, password, setUser);
     } catch (error) {
-      console.error('Erro no login:', error);
       throw error;
     }
   };
 
   const logout = async () => {
-    try {
-      await removeData('user');
-      await removeData('token');
-      setUser(null);
-      delete axios.defaults.headers.common['Authorization'];
+    const success = await AuthController.logout(setUser);
+    if (success) {
       Alert.alert(
         'Sessão Expirada',
         'Sua sessão expirou. Faça login novamente.',
       );
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error);
     }
   };
 

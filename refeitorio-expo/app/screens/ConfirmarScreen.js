@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import Constants from 'expo-constants';
-import { confirmarAlmoco, getPresenca } from '../services/ApiServices';
+import PresencaController from '../controllers/PresencaController';
 import { useAuth } from '../context/AuthContext';
 
 const DEADLINE_HOURS = Constants.expoConfig.extra.DEADLINE_HOURS;
@@ -14,47 +14,34 @@ export default function ConfirmarScreen() {
 
   const checkTimeRestriction = useCallback(() => {
     const now = new Date();
-    const isPastDeadline =
+    setIsTimeRestricted(
       now.getHours() > DEADLINE_HOURS ||
-      (now.getHours() === DEADLINE_HOURS &&
-        now.getMinutes() >= DEADLINE_MINUTES);
-    setIsTimeRestricted(isPastDeadline);
+        (now.getHours() === DEADLINE_HOURS &&
+          now.getMinutes() >= DEADLINE_MINUTES),
+    );
   }, []);
-
-  const getConfirmacao = useCallback(async () => {
-    try {
-      const response = await getPresenca(user.id);
-      if (response && Object.keys(response).length > 0) {
-        setPresenca(true);
-      }
-    } catch (_error) {
-      setPresenca(null);
-    }
-  }, [user.id]);
 
   useEffect(() => {
     checkTimeRestriction();
-    getConfirmacao();
-  }, [getConfirmacao, checkTimeRestriction]);
+    PresencaController.getConfirmacao(user.id).then(setPresenca);
+  }, [checkTimeRestriction, user.id]);
 
   const handleConfirmacao = async (status) => {
     if (isTimeRestricted) {
       Alert.alert(
         'Aviso',
-        'O horário limite para confirmar o almoço já passou (09:30).',
+        `O horário limite para confirmar o almoço já passou (${DEADLINE_HOURS}:${DEADLINE_MINUTES}).`,
       );
       return;
     }
 
     try {
-      await confirmarAlmoco(user.id, status);
-      setPresenca(status);
+      await PresencaController.handleConfirmacao(user.id, status, setPresenca);
       Alert.alert(
         'Sucesso',
         status ? 'Presença confirmada!' : 'Ausência confirmada!',
       );
-    } catch (error) {
-      console.error('Erro ao confirmar presença:', error);
+    } catch (_) {
       Alert.alert('Erro', 'Não foi possível confirmar sua presença.');
     }
   };
@@ -62,9 +49,7 @@ export default function ConfirmarScreen() {
   return (
     <View className="p-4 bg-white flex-1 justify-center">
       <TouchableOpacity
-        className={`py-3 rounded-lg mb-4 shadow-md items-center ${
-          presenca ? 'bg-gray-400' : 'bg-green-500'
-        }`}
+        className={`py-3 rounded-lg mb-4 shadow-md items-center ${presenca ? 'bg-gray-400' : 'bg-green-500'}`}
         onPress={() => handleConfirmacao(true)}
         disabled={presenca === true}
       >
@@ -76,14 +61,12 @@ export default function ConfirmarScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        className={`py-3 rounded-lg mb-4 shadow-md items-center ${
-          !presenca ? 'bg-gray-400' : 'bg-red-500'
-        }`}
+        className={`py-3 rounded-lg mb-4 shadow-md items-center ${presenca === false ? 'bg-gray-400' : 'bg-red-500'}`}
         onPress={() => handleConfirmacao(false)}
         disabled={presenca === false}
       >
         <Text
-          className={`text-white text-lg font-semibold ${!presenca ? 'opacity-50' : ''}`}
+          className={`text-white text-lg font-semibold ${presenca === false ? 'opacity-50' : ''}`}
         >
           Cancelamento de almoço
         </Text>
