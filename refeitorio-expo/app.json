@@ -2,16 +2,22 @@
   "expo": {
     "name": "Refeitório Raisman",
     "slug": "refeitorio-raisman",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/favicon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "extra": {
-      "API_URL": "http:192.168.0.137:3000/api",
+      "API_URL": "http://192.168.0.137:3000/api",
       "DEADLINE_HOURS": 9,
-      "DEADLINE_MINUTES": 30
+      "DEADLINE_MINUTES": 30,
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "6e7c25c0-bf4b-4d75-a1be-5c9a5942e79c"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,6 +43,9 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "ios": {
+      "bundleIdentifier": "com.mlvieira.refeitorioraisman"
     }
   }
 }
