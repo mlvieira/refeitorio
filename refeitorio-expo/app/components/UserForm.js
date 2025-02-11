@@ -29,6 +29,8 @@ export default function UserForm({
       return;
     }
 
+    formData.username = formData.username.trim();
+
     onSubmit(formData);
   };
 
@@ -49,9 +51,16 @@ export default function UserForm({
         <TextInput
           className={`border border-gray-300 p-3 rounded-md mt-1 ${showRole ? 'bg-white' : 'bg-gray-200'}`}
           value={formData.username}
-          onChangeText={(value) => dispatch({ name: 'username', value })}
+          onChangeText={(value) =>
+            dispatch({ name: 'username', value: value.trimStart() })
+          }
           editable={showRole}
           placeholder="Digite o usuário"
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="default"
+          textContentType="username"
+          spellCheck={false}
         />
       </View>
 
@@ -68,6 +77,9 @@ export default function UserForm({
                 : 'Digite a senha'
             }
             secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="password"
           />
           <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}

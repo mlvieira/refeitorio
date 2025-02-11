@@ -17,8 +17,10 @@ export default function LoginScreen() {
   const { setUser } = useAuth();
 
   const handleLogin = async () => {
+    const trimmed = username.trim();
+
     try {
-      await AuthController.login(username, password, setUser);
+      await AuthController.login(trimmed, password, setUser);
     } catch (error) {
       Alert.alert('Erro no Login', error.message);
     }
@@ -42,7 +44,12 @@ export default function LoginScreen() {
         <TextInput
           className="border border-gray-400 p-2 rounded-md mt-1 mb-4 bg-white pr-16"
           value={username}
-          onChangeText={setUsername}
+          onChangeText={(text) => setUsername(text.trimStart())}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="default"
+          textContentType="username"
+          spellCheck={false}
           placeholder="Digite seu usuário"
         />
 
@@ -55,6 +62,9 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               placeholder="Digite sua senha"
               secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="password"
             />
             <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
