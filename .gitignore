@@ -39,3 +39,5 @@ refeitorio-expo/*.tsbuildinfo
 
 # npm lock file
 package-lock.json
+
+refeitorio-python-stats/venv
