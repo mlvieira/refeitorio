@@ -3,6 +3,14 @@
 ### O que você vai encontrar aqui:
 1. `refeitorio-expo` - Contém o aplicativo desenvolvido em React Native.
 2. `refeitorio-api` - Contém a API RESTful para comunicação entre o aplicativo e o banco de dados.
+3. `refeitorio-python-stats` - Contém python scripts para gerar estatísticas.
+4. `stats` - Contém gráficos gerados usando python scripts.
+5. `screenshots` - Contém screenshots individuais de cada tela.
+
+---
+### Preview:
+
+![collage.png](https://github.com/mlvieira/refeitorio/blob/master/collage.png?raw=true)
 
 ---
 
